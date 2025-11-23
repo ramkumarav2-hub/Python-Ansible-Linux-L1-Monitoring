@@ -1,0 +1,32 @@
+---
+- name: Display Memory Usage with Threshold
+  hosts: all
+  gather_facts: yes
+  vars:
+    mem_threshold: 888888880   # Set threshold percentage
+  tasks:
+    - name: Calculate Memory Stats
+      set_fact:
+        total_mem: "{{ ansible_memtotal_mb }}"
+        free_mem: "{{ ansible_memfree_mb }}"
+        used_mem: "{{ ansible_memtotal_mb - ansible_memfree_mb }}"
+        usage_percent: "{{ ((ansible_memtotal_mb - ansible_memfree_mb) / ansible_memtotal_mb * 100) | round(2) }}"
+    
+    - name: Show current Memory usage
+      debug:
+        msg: "Current Memory usage: {{ usage_percent }}%"
+
+    - name: Pull memory info
+      shell: free -h
+      register: memory_info
+      when: usage_percent | float < mem_threshold
+
+    - name: Display Memory Usage
+      debug:
+        var: memory_info.stdout_lines
+      when: usage_percent | float < mem_threshold
+
+    - name: Check Memory Threshold
+      when: usage_percent | float >= mem_threshold
+      debug:
+        msg: "WARNING: Memory usage is {{ usage_percent }}%, exceeds {{ mem_threshold }}%!"

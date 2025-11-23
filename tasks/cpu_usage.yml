@@ -1,0 +1,35 @@
+---
+- name: Monitor CPU Usage and Top Processes
+  hosts: all
+  become: yes
+  vars:
+    cpu_threshold: 80
+
+  tasks:
+    - name: Get current CPU usage (user + system)
+      shell: top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}'
+      register: cpu_usage
+
+    - name: Show current CPU usage
+      debug:
+        msg: "Current CPU usage: {{ cpu_usage.stdout }}%"
+
+    - name: Get top 5 CPU-consuming processes if usage exceeds threshold
+      shell: ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6 | awk '{printf "%-8s %-10s %-5s\n", $1, $2, $3}'
+      register: top_processes
+      when: cpu_usage.stdout | float > cpu_threshold
+    
+    - name: Get Info
+      shell: ps -eo pid,comm,%cpu --sort=-%cpu | head -n 1 | awk '{printf "%-8s %-20s %-5s\n", $1, $2, $3}'; ps -eo pid,comm,%cpu --sort=-%cpu | head -n 2 | tail -n +2 | awk '{printf "%-8s %-20s %-5s\n", $1, $2, $3}'; ps -eo pid,comm,%cpu --sort=-%cpu | head -n 3 | tail -n +3 | awk '{printf "%-8s %-20s %-5s\n", $1, $2, $3}'; ps -eo pid,comm,%cpu --sort=-%cpu | head -n 4 | tail -n +4 | awk '{printf "%-8s %-20s %-5s\n", $1, $2, $3}'; ps -eo pid,comm,%cpu --sort=-%cpu | head -n 5 | tail -n +5 | awk '{printf "%-8s %-20s %-5s\n", $1, $2, $3}'; ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6 | tail -n +6 | awk '{printf "%-8s %-20s %-5s\n", $1, $2, $3}';
+      register: cpu_info
+      when: cpu_usage.stdout | float < cpu_threshold
+
+    - name: Display top CPU-consuming processes
+      debug:         
+        var: cpu_info.stdout_lines
+      when: cpu_usage.stdout | float < cpu_threshold
+
+    - name: Alert if CPU usage exceeds threshold
+      debug:
+        msg: "Warning! CPU usage is exceeding the threshold of {{ cpu_usage.stdout }}%"
+      when: cpu_usage.stdout | float >= cpu_threshold

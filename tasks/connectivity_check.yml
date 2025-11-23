@@ -1,0 +1,35 @@
+---
+- name: Check Linux Connectivity and Gather Info
+  hosts: all
+  gather_facts: no
+  ignore_unreachable: yes
+  tasks:
+    - name: Check Linux connectivity
+      ping:
+      register: ping_result
+      ignore_errors: yes
+
+    - name: Check if port 22 is open
+      wait_for:
+        port: 22
+        timeout: 5
+      register: ssh_port_check
+      ignore_errors: yes
+      when: ping_result is succeeded
+
+    - name: Get hostname
+      shell: hostname -f; date; uptime
+      register: connect_info
+      when: ping_result is succeeded and ssh_port_check is succeeded
+      ignore_errors: yes
+
+    - name: Display results
+      debug: 
+        var: connect_info.stdout_lines
+      when: ping_result is succeeded and ssh_port_check is succeeded
+      ignore_errors: yes
+
+    - name: Report unreachable servers
+      debug:
+        msg: "{{ inventory_hostname }} is NOT reachable or port 22 is closed."
+      when: ping_result is failed or ssh_port_check is failed

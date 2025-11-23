@@ -1,0 +1,15 @@
+---
+  - name: Playbook
+    hosts: all
+    become: yes
+    tasks:
+      - name: Qualys service restart
+        shell:
+          cmd: systemctl restart qualys-cloud-agent
+        check_mode: false
+
+      - shell: ps -ef | grep qualys-c
+        register: qualys_process
+
+      - debug:
+          var: qualys_process.stdout_lines

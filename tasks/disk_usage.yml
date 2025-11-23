@@ -1,0 +1,38 @@
+# ansible-playbook disk_monitor.yml --extra-vars "mount_point=/var"
+---
+- name: Monitor Mount Point Disk Usage
+  hosts: all
+  become: yes
+  vars:
+    mount_point: "{{ mount_point }}"  # Dynamically passed variable
+    usage_threshold: 80
+  tasks:
+
+    - name: Ensure the mount point exists
+      stat:
+        path: "{{ mount_point }}"
+      register: mount_status
+
+#    - name: Fail if mount point doesn't exist
+#      fail:
+#        msg: "Mount point {{ mount_point }} does not exist!"
+#      when: not mount_status.stat.exists
+
+    - name: Check disk usage
+      shell: df -h "{{ mount_point }}" | awk 'NR==2 {print $5}' | sed 's/%//'
+      register: disk_usage
+
+    - name: Pull disk info
+      shell: hostname -f; date; df -h {{ mount_point }}
+      register: disk_info
+      when: disk_usage.stdout | int < usage_threshold
+      
+    - name: Display disk usage
+      debug:
+        msg: "{{ disk_info.stdout_lines }}"
+      when: disk_usage.stdout | int < usage_threshold
+
+    - name: Alert if disk usage exceeds threshold
+      debug:
+        msg: "Warning! Disk usage at {{ mount_point }} is {{ disk_usage.stdout }}%, exceeding the threshold of {{ usage_threshold }}%"
+      when: disk_usage.stdout | int >= usage_threshold
