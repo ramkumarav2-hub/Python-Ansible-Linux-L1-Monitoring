@@ -1,4 +1,5 @@
-Process Explanation
+Process Explanation:
+
 This workflow automates Linux L1 monitoring tasks using a Python script and Ansible playbooks. The process begins with a menu-driven Python script that prompts the user 
 to select a task (Disk, CPU, Memory, Connectivity, or Qualys Restart). Based on user input, the script dynamically constructs an Ansible command, optionally including 
 parameters like server name or mount point. The command is executed using subprocess.run(), and error handling ensures failures are reported. This approach reduces manual 
