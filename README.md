@@ -26,8 +26,13 @@ Below are the playbooks used in this workflow:
 Playbook Purposes:
 
 Below are the purposes of each playbook included in this workflow:
+
 •	Disk Usage Monitoring: Checks disk usage for specified mount points and alerts if usage exceeds a defined threshold.
+
 •	CPU Usage Monitoring: Monitors CPU utilization and retrieves top processes when usage exceeds a defined threshold.
+
 •	Memory Usage Monitoring: Calculates memory usage and alerts if usage exceeds a defined threshold.
+
 •	Linux Connectivity Check: Verifies connectivity to Linux servers, checks SSH port availability, and gathers system information.
+
 •	Qualys Service Restart: Restarts the Qualys Cloud Agent service and confirms its process is running.
