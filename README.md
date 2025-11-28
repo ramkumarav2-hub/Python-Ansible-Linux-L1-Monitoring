@@ -23,7 +23,8 @@ Below are the playbooks used in this workflow:
 4.	memory_usage.yml
 5.	qualys_restart.yml
    
-Playbook Purposes
+Playbook Purposes:
+
 Below are the purposes of each playbook included in this workflow:
 •	Disk Usage Monitoring: Checks disk usage for specified mount points and alerts if usage exceeds a defined threshold.
 •	CPU Usage Monitoring: Monitors CPU utilization and retrieves top processes when usage exceeds a defined threshold.
